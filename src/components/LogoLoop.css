@@ -37,6 +37,7 @@
   display: inline-flex;
   align-items: center;
 }
+
 .logoloop__item img {
   height: var(--logoloop-logoHeight);
   width: auto;

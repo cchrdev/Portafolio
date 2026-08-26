@@ -76,7 +76,7 @@ const ScrollStack = ({
 
     isUpdatingRef.current = true;
 
-    const { scrollTop, containerHeight, scrollContainer } = getScrollData();
+    const { scrollTop, containerHeight } = getScrollData();
     const stackPositionPx = parsePercentage(stackPosition, containerHeight);
     const scaleEndPositionPx = parsePercentage(scaleEndPosition, containerHeight);
 
@@ -126,8 +126,11 @@ const ScrollStack = ({
         translateY = pinEnd - cardTop + stackPositionPx + itemStackDistance * i;
       }
 
+      // Whole-pixel translateY (and a coarser change threshold) so the pinned
+      // cards don't re-rasterize on sub-pixel scroll deltas — that constant
+      // tiny-write cycle is what makes the stack look like it vibrates.
       const newTransform = {
-        translateY: Math.round(translateY * 100) / 100,
+        translateY: Math.round(translateY),
         scale: Math.round(scale * 1000) / 1000,
         rotation: Math.round(rotation * 100) / 100,
         blur: Math.round(blur * 100) / 100
@@ -136,7 +139,7 @@ const ScrollStack = ({
       const lastTransform = lastTransformsRef.current.get(i);
       const hasChanged =
         !lastTransform ||
-        Math.abs(lastTransform.translateY - newTransform.translateY) > 0.1 ||
+        Math.abs(lastTransform.translateY - newTransform.translateY) > 0.5 ||
         Math.abs(lastTransform.scale - newTransform.scale) > 0.001 ||
         Math.abs(lastTransform.rotation - newTransform.rotation) > 0.1 ||
         Math.abs(lastTransform.blur - newTransform.blur) > 0.1;
@@ -206,6 +209,8 @@ const ScrollStack = ({
       animationFrameRef.current = requestAnimationFrame(raf);
 
       lenisRef.current = lenis;
+      // shared instance so nav/hero/rail jumps don't fight the smoothing
+      window.__lenis = lenis;
       return lenis;
     } else {
       const scroller = scrollerRef.current;
@@ -277,6 +282,7 @@ const ScrollStack = ({
         cancelAnimationFrame(animationFrameRef.current);
       }
       if (lenisRef.current) {
+        if (window.__lenis === lenisRef.current) window.__lenis = null;
         lenisRef.current.destroy();
       }
       stackCompletedRef.current = false;

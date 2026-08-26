@@ -6,8 +6,10 @@ import { useEffect, useState, useRef, memo } from 'react'; // <-- 1. Importamos 
 const DecryptedTextComponent = ({
   text,
   speed = 50,
-  sequential = false,
-  revealDirection = 'start',
+  // sequential y revealDirection no se usan en la animación, pero se capturan
+  // para que no se propaguen al DOM a través de ...props
+  sequential: _sequential,
+  revealDirection: _revealDirection,
   characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
   className = '',
   startAnimation = false,

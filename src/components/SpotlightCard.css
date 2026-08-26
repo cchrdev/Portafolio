@@ -1,0 +1,36 @@
+/* src/components/SpotlightCard.css */
+
+.spotlight {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: linear-gradient(
+    180deg,
+    rgba(233, 233, 231, 0.04),
+    rgba(233, 233, 231, 0.012)
+  );
+  transition: border-color 0.4s var(--ease), transform 0.5s var(--ease-out);
+}
+
+.spotlight::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.45s var(--ease);
+  background: radial-gradient(
+    320px circle at var(--spot-x, 50%) var(--spot-y, 50%),
+    rgba(233, 233, 231, 0.1),
+    transparent 65%
+  );
+  pointer-events: none;
+}
+
+.spotlight:hover {
+  border-color: rgba(233, 233, 231, 0.28);
+  transform: translate3d(0, -2px, 0);
+}
+.spotlight:hover::before {
+  opacity: 1;
+}

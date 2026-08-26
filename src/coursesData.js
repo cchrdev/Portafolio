@@ -1,22 +1,5 @@
 // src/coursesData.js
 
-// Primero, importa las imágenes de las insignias
-import ccna1 from './assets/badges/ccna-badge.png';
-import ccna2 from './assets/badges/ccna-badge2.png';
-import python from './assets/badges/python-badge.png';
-import fortinet4 from './assets/badges/fortinet-badge4.png';
-import fortinet2 from './assets/badges/fortinet-badge2.png';
-import fortinet3 from './assets/badges/fortinet-badge3.png';
-// Lista de insignias para BounceCards
-export const courseBadges = [
-  ccna1,
-  python,
-  fortinet4,
-  ccna2,
-  fortinet2,
-  fortinet3,
-];
-
 // Lista detallada de cursos para el texto
 export const courseList = [
   {

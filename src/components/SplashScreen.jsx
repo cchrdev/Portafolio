@@ -1,83 +1,74 @@
-// src/components/SplashScreen.jsx (VERSIÓN FINAL CON useCallback)
+// src/components/SplashScreen.jsx
+// Cinematic preloader: the brand mark sits over the live WebGL well while a
+// hairline progress bar fills and a counter climbs. When the descent is done
+// the whole sheet fades, dropping us into the page.
 
-import { motion, AnimatePresence } from 'framer-motion';
-import { useEffect, useState, useCallback } from 'react'; // <-- 1. Importamos useCallback
-import { useNavigate } from 'react-router-dom';
-import DecryptedText from './DecryptedText.jsx';
-import Magnet from './Magnet.jsx';
+import { useEffect, useRef, useState } from "react";
+import { useLang } from "../i18n.jsx";
+import CatMark from "./CatMark.jsx";
 
-export default function SplashScreen() {
-  const navigate = useNavigate();
-  const [startTitle, setStartTitle] = useState(false);
-  const [startSubtitle, setStartSubtitle] = useState(false);
-  const [showButton, setShowButton] = useState(false);
+export default function SplashScreen({ onEnter }) {
+  const { t } = useLang();
+  const barRef = useRef(null);
+  const pctRef = useRef(null);
+  const statusRef = useRef(null);
+  const [done, setDone] = useState(false);
 
   useEffect(() => {
-    const titleTimer = setTimeout(() => setStartTitle(true), 500);
-    return () => clearTimeout(titleTimer);
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const duration = reduceMotion ? 500 : 2300;
+    document.body.classList.add("is-locked");
+
+    let statusIdx = 0;
+    if (statusRef.current) statusRef.current.textContent = t.splash.status[0];
+    const statusTimer = setInterval(() => {
+      statusIdx = (statusIdx + 1) % t.splash.status.length;
+      if (statusRef.current) statusRef.current.textContent = t.splash.status[statusIdx];
+    }, 640);
+
+    const start = performance.now();
+    let raf = 0;
+    const tick = (now) => {
+      const elapsed = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - elapsed, 3);
+      const pct = Math.round(eased * 100);
+      if (barRef.current) barRef.current.style.right = `${100 - pct}%`;
+      if (pctRef.current) pctRef.current.textContent = String(pct).padStart(3, "0");
+      if (elapsed < 1) {
+        raf = requestAnimationFrame(tick);
+      } else {
+        setDone(true);
+        setTimeout(() => {
+          document.body.classList.remove("is-locked");
+          onEnter?.();
+        }, reduceMotion ? 150 : 750);
+      }
+    };
+    raf = requestAnimationFrame(tick);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      clearInterval(statusTimer);
+      document.body.classList.remove("is-locked");
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // --- 2. Envolvemos las funciones en useCallback ---
-  const onTitleComplete = useCallback(() => {
-    setTimeout(() => {
-        setStartSubtitle(true);
-    }, 500);
-  }, []); // El array vacío asegura que la función NUNCA se vuelva a crear
-
-  const onSubtitleComplete = useCallback(() => {
-    setTimeout(() => {
-        setShowButton(true);
-    }, 800);
-  }, []); // El array vacío asegura que la función NUNCA se vuelva a crear
-
-  const handleEnter = () => {
-    navigate('/inicio');
-  };
-
   return (
-    <motion.div 
-      className="splash-screen"
-      exit={{ opacity: 0, transition: { duration: 0.8, ease: "easeInOut" } }}
-    >
-      <div className="decrypt-container">
-        <DecryptedText 
-          text="Christopher Nava"
-          className="splash-title-decrypt"
-          sequential={true}
-          revealDirection="start"
-          speed={120}
-          startAnimation={startTitle}
-          onAnimationComplete={onTitleComplete} // <-- Ahora recibe una función memorizada
-        />
-        <DecryptedText 
-          text="Developer"
-          className="splash-subtitle-decrypt"
-          sequential={true}
-          revealDirection="start"
-          speed={150}
-          startAnimation={startSubtitle}
-          onAnimationComplete={onSubtitleComplete} // <-- Ahora recibe una función memorizada
-        />
+    <div className={`pre ${done ? "done" : ""}`} role="status" aria-label={t.splash.aria}>
+      <div className="pre-in">
+        <div className="pre-mark">
+          <CatMark />
+        </div>
+        <div className="pre-word">{t.splash.brand}</div>
+        <div className="pre-bar">
+          <i ref={barRef} />
+        </div>
+        <div className="pre-meta">
+          <span ref={statusRef}>{t.splash.status[0]}</span>
+          <b ref={pctRef}>000</b>
+        </div>
       </div>
-
-      <AnimatePresence>
-        {showButton && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0, transition: { duration: 1, delay: 0.2 } }}
-            exit={{ opacity: 0 }}
-          >
-            <Magnet>
-              <button
-                className="splash-button cursor-target"
-                onClick={handleEnter}
-              >
-                Learn more
-              </button>
-            </Magnet>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
+    </div>
   );
 }

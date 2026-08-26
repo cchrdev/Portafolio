@@ -1,31 +1,44 @@
-// src/App.jsx (VERSIÓN FINAL CON LAYOUT)
+// src/App.jsx
 
-import { Routes, Route } from 'react-router-dom';
+import { useState } from "react";
 
-// Componentes y Páginas
-import Layout from './Layout.jsx'; // <-- Importamos el nuevo Layout
-import SplashScreen from './components/SplashScreen.jsx';
-import InicioPage from './pages/InicioPage.jsx';
-import AboutPage from './pages/AboutPage.jsx';
-import ProjectsPage from './pages/ProjectsPage.jsx';
-import ContactPage from './pages/ContactPage.jsx';
+import Layout from "./Layout.jsx";
+import SplashScreen from "./components/SplashScreen.jsx";
+import CatCompanion from "./components/CatCompanion.jsx";
+import HeroSection from "./components/HeroSection.jsx";
+import AboutSection from "./components/AboutSection.jsx";
+import ContactSection from "./components/ContactSection.jsx";
 
-
-import './App.css';
+import "./App.css";
 
 export default function App() {
-  return (
-    <Routes>
-      {/* La ruta del SplashScreen está fuera del Layout para que no tenga cursor ni fondo persistente */}
-      <Route path="/" element={<SplashScreen />} />
+  // splash → scroll (portfolio)
+  const [phase, setPhase] = useState(() =>
+    window.location.hash === "#sin-splash" ? "scroll" : "splash"
+  );
 
-      {/* Todas las demás rutas ahora viven DENTRO del Layout */}
-      <Route element={<Layout />}>
-        <Route path="/inicio" element={<InicioPage />} />
-        <Route path="/about" element={<AboutPage />} />
-        <Route path="/projects" element={<ProjectsPage />} />
-        <Route path="/contact" element={<ContactPage />} />
-      </Route>
-    </Routes>
+  return (
+    <>
+      {phase === "splash" && (
+        <SplashScreen key="splash" onEnter={() => setPhase("scroll")} />
+      )}
+
+      {phase === "scroll" && (
+        <>
+          {/* the cat that wanders the page — kept OUTSIDE the language
+              wrapper so its fixed canvas is never re-contained by the
+              language-change animation */}
+          <CatCompanion greet />
+
+          <Layout>
+            <HeroSection />
+            <div className="content-flow">
+              <AboutSection />
+              <ContactSection />
+            </div>
+          </Layout>
+        </>
+      )}
+    </>
   );
 }

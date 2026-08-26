@@ -1,0 +1,88 @@
+/* src/components/CatCompanion.css — the wandering cat companion */
+
+.companion-cat {
+  position: fixed;
+  inset: 0;
+  z-index: 62; /* above content, vignette and grain so the cat always reads */
+  pointer-events: none;
+}
+
+.content-flow {
+  position: relative;
+  z-index: auto;
+}
+
+/* ---------- bocadillo ---------- */
+.cat-bubble {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 63;
+  width: max-content;
+  max-width: 220px;
+  background: rgba(8, 8, 10, 0.94);
+  border: 1px solid var(--line);
+  border-left: 2px solid var(--ember);
+  border-radius: 4px;
+  padding: 10px 13px;
+  font-family: var(--font-mono);
+  opacity: 0;
+  visibility: hidden;
+  translate: 0 6px;
+  transition: opacity 0.25s ease, translate 0.25s ease, visibility 0s 0.25s;
+  pointer-events: none;
+}
+.cat-bubble.show {
+  opacity: 1;
+  visibility: visible;
+  translate: 0 0;
+  transition: opacity 0.25s ease, translate 0.25s ease;
+  pointer-events: auto;
+}
+.cat-bubble::after {
+  /* colita del bocadillo */
+  content: "";
+  position: absolute;
+  left: 26px;
+  bottom: -5px;
+  width: 8px;
+  height: 8px;
+  background: rgba(8, 8, 10, 0.94);
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  transform: rotate(45deg);
+}
+.cat-bubble p {
+  margin: 0;
+  font-size: 11.5px;
+  line-height: 1.55;
+  letter-spacing: 0.04em;
+  color: var(--bone);
+}
+.cat-bubble button {
+  margin-top: 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--ember);
+  background: none;
+  border: 1px solid var(--ember);
+  border-radius: 3px;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.cat-bubble button:hover {
+  background: var(--ember);
+  color: #05070a;
+}
+.cat-bubble button:focus-visible {
+  outline: 2px solid var(--ember);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cat-bubble {
+    transition: none;
+  }
+}
